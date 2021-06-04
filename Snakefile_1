@@ -1,0 +1,24 @@
+import os
+from collections import defaultdict
+
+def gen(folder1, folder2):
+    return ["{}/{}".format(folder1, n) for n in os.listdir(folder2)  if n.startswith(".")==False]
+
+rule all:
+    input: gen("output", "input")
+    output: ".status"
+    shell: "touch {output}"
+
+rule count:
+    input: "input/{file}"
+    output: "output/{file}"
+    run:
+        with open(str(input), "r") as inp:
+            count_d = defaultdict(int)
+            for line in inp:
+                line = line.strip().lower()
+                for s in line:
+                    count_d[s] += 1
+        with open(str(output), "w") as out:
+            for el in sorted(list(count_d.keys())):
+                out.write("{}: {}\n".format(el, str(count_d[el])))
